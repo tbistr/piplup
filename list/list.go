@@ -1,8 +1,9 @@
 package list
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Item interface {
@@ -14,13 +15,15 @@ type Model struct {
 	// Items is the list of items to display.
 	items         []Item
 	Width, Height int
+	Spacing       int
 }
 
 func New(items []Item, width, height int) Model {
 	return Model{
-		items:  items,
-		Width:  width,
-		Height: height,
+		items:   items,
+		Width:   width,
+		Height:  height,
+		Spacing: 1,
 	}
 }
 
@@ -35,7 +38,7 @@ func (m Model) View() string {
 
 	for _, item := range m.items {
 		renderred := item.Render(false)
-		currentHeight += item.Height()
+		currentHeight += item.Height() + m.Spacing
 
 		if currentHeight > m.Height {
 			break
@@ -44,5 +47,5 @@ func (m Model) View() string {
 		items = append(items, renderred)
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Top, items...)
+	return strings.Join(items, strings.Repeat("\n", m.Spacing+1))
 }
