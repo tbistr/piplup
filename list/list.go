@@ -1,23 +1,26 @@
 package list
 
 import (
-	"strings"
-
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Item interface {
-	Render() string
+	Render(selected bool) string
+	Height() int
 }
 
 type Model struct {
 	// Items is the list of items to display.
-	items []Item
+	items         []Item
+	Width, Height int
 }
 
-func New(items []Item) Model {
+func New(items []Item, width, height int) Model {
 	return Model{
-		items: items,
+		items:  items,
+		Width:  width,
+		Height: height,
 	}
 }
 
@@ -27,12 +30,19 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	b := strings.Builder{}
+	items := []string{}
+	currentHeight := 0
 
 	for _, item := range m.items {
-		b.WriteString(item.Render())
-		b.WriteString("\n")
+		renderred := item.Render(false)
+		currentHeight += item.Height()
+
+		if currentHeight > m.Height {
+			break
+		}
+
+		items = append(items, renderred)
 	}
 
-	return b.String()
+	return lipgloss.JoinVertical(lipgloss.Top, items...)
 }
